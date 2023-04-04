@@ -13,7 +13,7 @@ export function Home() {
     <AnimatePresence>
         {snap.intro && (
             <motion.section >
-                <img src="../../public/three2_thumb.png" alt="logo" />
+                <motion.img src="/three2_thumb.png" alt="logo" {...slideAnimation( "left","down")}/>
                 <motion.div {...slideAnimation( "left","none")} >
                     <motion.h1 {...headTextAnimation} >LET'S DO IT!</motion.h1>
                 </motion.div>
