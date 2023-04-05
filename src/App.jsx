@@ -40,7 +40,7 @@ export function App() {
         
         <OrbitControls
           enableZoom={ window.ontouchstart ? true : false }
-          enabled ={ window.ontouchstart ? true : false }
+          //enabled ={ window.ontouchstart ? true : false }
           maxPolarAngle={Math.PI/2+Math.PI/6} minPolarAngle={Math.PI/2-Math.PI/3}
           maxAzimuthAngle={0+Math.PI/3}       minAzimuthAngle={0-Math.PI/3}
         />
