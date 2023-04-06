@@ -11,15 +11,20 @@ useGLTF.preload( "./shirt_baked_collapsed.glb" )
 
 export function App() {
   const [ touch, setTouch ] = useState(false)
+  const [ color, setColor ] = useState("gray")
 
-  function checkTouch ()  {
-    window.addEventListener( "touchstart", ()=> {setTouch(true)} ) ;
+
+function checkIfTouch (setter)  {
+    window.addEventListener( "touchstart", ()=> { setter(true)} ) ;
     return () => { window.removeEventListener("touchstart", window); 
     console.log("touchstart clean up") }
-  };
+};
+function setOnResize( setter ) {
+  window.addEventListener( "resize", () => { setter(false) ; checkIfTouch(setter)} )
+}
 
-  useEffect( () => checkTouch(), []);
-  useEffect( () => window.addEventListener( "resize", () => {setTouch(false); checkTouch()} ), []);
+  useEffect( () => checkIfTouch(setTouch), []);
+  useEffect( () => setOnResize(setTouch) , []);
 
 
   return(
@@ -27,10 +32,11 @@ export function App() {
       <Canvas
         camera={ {position: [0, 0.0, 0.8]  }}
         shadows
+        gl={ {antilasing:true} }
       >
         <spotLight 
-          intensity={0.5} castShadow penumbra={2} decay={1}
-          position={[0.2, 0.5 , 3 ]} lookAt={[0,0,0]} 
+          intensity={0.5} castShadow 
+          position={[0.5, 1 , 3 ]} lookAt={[0,0,0]} 
           color={"white"}
         />
         <spotLight 
@@ -44,7 +50,8 @@ export function App() {
           color={"green"}
         />
         <Environment preset="city"/>
-          <Shirt/>
+          <Shirt color={color}/>
+          <Backdrop/>
         <OrbitControls
           enableZoom={ window.ontouchstart ? true : false }
           enabled ={touch}
@@ -53,19 +60,19 @@ export function App() {
         />
       </Canvas>
       <Home/>
-      <Customizer/>
+      <Customizer color={color} setter={setColor} />
     </>
   )
 }
 
-function Shirt () {
+function Shirt ({color}) {
   const {nodes, materials} = useGLTF("./shirt_baked_collapsed.glb");
   const refShirt = useRef();
   const startingPoint = Date.now()
   useFrame( ()=> {
     window.addEventListener( "mousemove", (e)=> {
-      refShirt.current.rotation.y = Math.sin((e.clientX/window.innerWidth-0.5)*4 )*4
-      refShirt.current.rotation.x = Math.sin(-(e.clientY/window.innerHeight-0.5)*4 )/2
+      refShirt.current.rotation.y = Math.sin((e.clientX/window.innerWidth-0.5)*4 )*2
+      refShirt.current.rotation.x = Math.max(Math.sin( -(e.clientY/window.innerHeight-0.5)*4 )/2, 0.1) 
     })
     let timeElapsed = Date.now()-startingPoint
     //refShirt.current.rotation.y = Math.sin((timeElapsed)/1000)/8  
@@ -75,17 +82,17 @@ function Shirt () {
   return (
     <mesh
         ref = {refShirt}          
-         geometry={nodes.T_Shirt_male.geometry} 
+        geometry={nodes.T_Shirt_male.geometry} 
         castShadow
     >
-      <meshStandardMaterial side={ THREE.DoubleSide } /> 
+      <meshStandardMaterial side={ THREE.DoubleSide } color={color}/> 
     </mesh>
   )
 }
 
 function Backdrop(params) {
   return(
-    <mesh position= { [0,0,-0.3] } receiveShadow>
+    <mesh position= { [0,0,-0.5] } receiveShadow>
       <planeGeometry/>
       <meshStandardMaterial color={"rgb(255, 255, 255)"} /> 
     </mesh>
